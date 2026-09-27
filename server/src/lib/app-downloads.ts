@@ -26,7 +26,7 @@ export const APP_DOWNLOADS: AppDownloadInfo[] = [
     desc: '完整项目管理系统 · 工作台/项目/任务/采购/文件/IM 全功能',
     version: '1.0.0',
     apkPath: '/downloads/pm-app-1.0.0.apk',
-    sha256: 'a0fd84d0929615069dfa4d21a117de6e45ae9ca7ecb759e900a1d81cf7b48da9',
+    sha256: '3e26f5d2eda7896b8c2260fe212f3ce4454ae9b250e29f9bace82f049b89773e',
   },
   {
     key: 'chat',
@@ -34,7 +34,7 @@ export const APP_DOWNLOADS: AppDownloadInfo[] = [
     desc: '独立 IM 应用 · 消息实时同步 + 微信式视频/语音通话',
     version: '1.8.1',
     apkPath: '/downloads/pm-chat-1.8.1.apk',
-    sha256: 'e9da0f1cc7e33ebd3a738fb341a64d00a7c9d8c1f0ad07b023ce8e457da853f5',
+    sha256: 'cd5d2797ec104590b1992af5d4b29114c19c69ae385561d4794f16169d00be30',
   },
 ]
 

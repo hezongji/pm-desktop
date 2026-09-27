@@ -1,0 +1,26 @@
+node_modules/
+dist/
+dist-test/
+release/
+release-test/
+.asar-scan/
+.asar-scan-test/
+release-app-main.cjs
+release-test-app-main.cjs
+*.log
+.env
+.sentryclirc
+server/.next/
+server/uploads/
+server/backups/
+.spike/
+# 2.0 打包舞台与现场工具（stage=750MB 构建产物，绝不入仓）
+build/stage/
+build/.mt-pgdata/
+build/*.err
+build/handle*
+build/Eula.txt
+build/run-*.ps1
+build/test-migrate.ps1
+release-new/
+NVIDIA Corporation/

@@ -1,0 +1,67 @@
+# electron-builder 配置（Windows / NSIS）
+# 2.0 起为本地全栈包（壳 + 内嵌服务 + 嵌入式 PG）；卸载默认保留用户数据（DEVIATIONS D3-2）
+appId: io.github.hezongji.pm-desktop
+productName: PM桌面
+copyright: Copyright © 2026 hezongji
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - dist/**
+  - package.json
+
+asar: true
+
+# 2.0 本地全栈（DEVIATIONS D3-1）：内嵌应用服务 / IM 服务 / 嵌入式 PostgreSQL / 迁移与基线数据
+# 来源：scripts/stage-server.mjs + stage-pg.mjs + stage-baseline.mjs → build/stage/
+extraResources:
+  - from: build/stage/pm-server
+    to: pm-server
+  # electron-builder 的 createFilter 硬性排除每个 from 根下的 node_modules（util/filter.js），
+  # filter 无法覆盖 → node_modules 单独作为 from 直拷（standalone 共享依赖 / 迁移 CLI 必需）
+  - from: build/stage/pm-server/node_modules
+    to: pm-server/node_modules
+  - from: build/stage/im-server
+    to: im-server
+  - from: build/stage/im-server/node_modules
+    to: im-server/node_modules
+  - from: build/stage/db
+    to: db
+  - from: build/stage/pg16
+    to: pg16
+  - from: build/stage/seed
+    to: seed
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: build/icon.ico
+  artifactName: pm-desktop-setup-${version}.exe
+  # publisherName 在 P2 签名落地后启用（P1 未签名，设置它会导致签名校验失败，见 DEVIATIONS.md）
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: 项目管理系统
+  installerIcon: build/installerIcon.ico
+  uninstallerIcon: build/uninstallerIcon.ico
+  installerHeaderIcon: build/installerIcon.ico
+  # 2.0 起卸载默认保留数据（DEVIATIONS D3-2：数据主权归用户，重装不丢库；
+  # 数据目录 %APPDATA%/pm-desktop，用户可在托盘「打开数据目录」自行管理）
+  deleteAppDataOnUninstall: false
+  runAfterFinish: true
+  differentialPackage: true
+
+publish:
+  provider: generic
+  url: https://pm.hezongji.cn/updates/
+  # 注意：不设 channel → 产物为 latest.yml（规格书 §4.4 stable 通道文件名契约）；
+  # beta 通道由 scripts/dist.mjs --beta 传入 -c.publish.channel=beta 生成 beta.yml

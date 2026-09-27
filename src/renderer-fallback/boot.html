@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'"
+    />
+    <title>项目管理系统 · 正在启动</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #0f1013;
+        color: #d7d8db;
+        font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+      }
+      .card {
+        width: min(560px, 100%);
+        padding: 40px 44px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 28px;
+      }
+      .logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #5e6ad2;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .brand-text {
+        font-size: 13px;
+        color: #8a8f98;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: 20px;
+        font-weight: 600;
+        color: #f7f8f8;
+      }
+      .sub {
+        margin: 0 0 26px;
+        font-size: 13px;
+        color: #8a8f98;
+      }
+      .stages {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        margin-bottom: 26px;
+      }
+      .stage {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        font-size: 13.5px;
+        color: #62666d;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+      .stage .icon {
+        width: 18px;
+        height: 18px;
+        flex: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: #5e6ad2;
+      }
+      .stage.done {
+        color: #8a8f98;
+      }
+      .stage.done .icon {
+        color: #4ea170;
+      }
+      .stage.active {
+        color: #f7f8f8;
+        background: #1a1b1e;
+      }
+      .stage.active .icon::before {
+        content: "";
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid #5e6ad2;
+        border-top-color: transparent;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .error-box {
+        display: none;
+        margin: 0 0 22px;
+        padding: 14px 16px;
+        background: #251a1a;
+        border: 1px solid #4b2a2a;
+        border-radius: 10px;
+        color: #e8b4b4;
+        font-size: 13px;
+        line-height: 1.7;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+      .actions {
+        display: none;
+        gap: 12px;
+      }
+      button {
+        padding: 9px 20px;
+        border-radius: 8px;
+        border: 1px solid #2c2d31;
+        background: #1a1b1e;
+        color: #d7d8db;
+        font-size: 13.5px;
+        cursor: pointer;
+      }
+      button.primary {
+        background: #5e6ad2;
+        border-color: #5e6ad2;
+        color: #fff;
+        font-weight: 600;
+      }
+      button:hover {
+        filter: brightness(1.15);
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      .hint {
+        margin-top: 26px;
+        font-size: 12px;
+        color: #62666d;
+        line-height: 1.8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="brand">
+        <div class="logo">PM</div>
+        <div class="brand-text">PM 项目管理系统桌面端</div>
+      </div>
+      <h1 id="headline">正在启动本地服务</h1>
+      <p class="sub">
+        数据保存在本机，无需联网。首次启动需要初始化数据库，请稍候。
+      </p>
+      <div class="stages" id="stages"></div>
+      <div class="error-box" id="error"></div>
+      <div class="actions" id="actions">
+        <button class="primary" id="retry">重试启动</button>
+        <button id="logs">打开日志目录</button>
+      </div>
+      <div class="hint">
+        所有数据均保存在本机数据目录中；卸载客户端默认保留数据。
+      </div>
+    </div>
+    <script>
+      (function () {
+        var STAGES = [
+          ["prepare", "准备本地运行环境"],
+          ["initdb", "初始化本地数据库（首次启动较慢）"],
+          ["start-pg", "启动本地数据库"],
+          ["migrate", "校验数据结构版本"],
+          ["seed", "写入初始数据"],
+          ["start-server", "启动应用服务"],
+          ["start-im", "启动实时消息服务"],
+          ["ready", "就绪"],
+        ];
+        var container = document.getElementById("stages");
+        var nodes = {};
+        STAGES.forEach(function (pair) {
+          var row = document.createElement("div");
+          row.className = "stage";
+          row.id = "stage-" + pair[0];
+          var icon = document.createElement("span");
+          icon.className = "icon";
+          var text = document.createElement("span");
+          text.textContent = pair[1];
+          row.appendChild(icon);
+          row.appendChild(text);
+          container.appendChild(row);
+          nodes[pair[0]] = row;
+        });
+
+        var reachedError = false;
+
+        function mark(stage) {
+          var idx = -1;
+          STAGES.forEach(function (pair, i) {
+            if (pair[0] === stage) idx = i;
+          });
+          if (idx < 0 || reachedError) return;
+          STAGES.forEach(function (pair, i) {
+            var row = nodes[pair[0]];
+            if (i < idx) {
+              row.className = "stage done";
+              row.querySelector(".icon").textContent = "✓";
+            } else if (i === idx) {
+              row.className = "stage active";
+            }
+          });
+        }
+
+        function showError(stageText, detail) {
+          reachedError = true;
+          document.getElementById("headline").textContent = "启动未完成";
+          var box = document.getElementById("error");
+          box.style.display = "block";
+          box.textContent =
+            (stageText ? "失败环节：" + stageText + "\n" : "") +
+            (detail || "未知错误");
+          document.getElementById("actions").style.display = "flex";
+          STAGES.forEach(function (pair) {
+            var row = nodes[pair[0]];
+            if (row.className === "stage active") row.className = "stage";
+          });
+        }
+
+        function hideError() {
+          reachedError = false;
+          document.getElementById("error").style.display = "none";
+          document.getElementById("actions").style.display = "none";
+          document.getElementById("headline").textContent = "正在启动本地服务";
+          STAGES.forEach(function (pair) {
+            var row = nodes[pair[0]];
+            row.className = "stage";
+            row.querySelector(".icon").textContent = "";
+          });
+        }
+
+        var bridge = window.pmDesktop;
+        if (bridge && typeof bridge.onBootProgress === "function") {
+          bridge.onBootProgress(function (event) {
+            if (!event || typeof event.stage !== "string") return;
+            if (event.stage === "error") {
+              showError(event.text, event.detail);
+              return;
+            }
+            mark(event.stage);
+          });
+        }
+
+        document.getElementById("retry").addEventListener("click", function () {
+          var btn = document.getElementById("retry");
+          btn.disabled = true;
+          btn.textContent = "正在重试…";
+          hideError();
+          if (bridge && typeof bridge.retryLocalRuntime === "function") {
+            bridge
+              .retryLocalRuntime()
+              .then(function (result) {
+                if (!result || !result.ok) {
+                  showError("重试启动", (result && result.error) || "重试失败");
+                }
+              })
+              .catch(function (error) {
+                showError("重试启动", String(error));
+              })
+              .finally(function () {
+                btn.disabled = false;
+                btn.textContent = "重试启动";
+              });
+          }
+        });
+
+        document.getElementById("logs").addEventListener("click", function () {
+          if (bridge && typeof bridge.revealLog === "function")
+            bridge.revealLog();
+        });
+      })();
+    </script>
+  </body>
+</html>

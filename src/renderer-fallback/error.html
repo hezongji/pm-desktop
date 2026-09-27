@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
+    <title>项目管理系统 · 连接异常</title>
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; min-height: 100vh; background: #0f172a; color: #e2e8f0;
+        font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+        display: flex; align-items: center; justify-content: center; padding: 32px;
+      }
+      .card {
+        width: min(680px, 100%); background: #16213a; border: 1px solid #24334f;
+        border-radius: 14px; padding: 32px 36px; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+      }
+      .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+      .logo {
+        width: 40px; height: 40px; border-radius: 10px; background: #0e6b58; color: #fff;
+        display: flex; align-items: center; justify-content: center; font-weight: 700; letter-spacing: 1px;
+      }
+      .brand-text { font-size: 14px; color: #94a3b8; }
+      h1 { margin: 0 0 12px; font-size: 22px; color: #f8fafc; }
+      pre {
+        margin: 0 0 24px; padding: 14px 16px; background: #0b1526; border: 1px solid #24334f;
+        border-radius: 10px; color: #cbd5e1; font-size: 13px; line-height: 1.7;
+        white-space: pre-wrap; word-break: break-all;
+      }
+      .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+      button {
+        padding: 10px 20px; border-radius: 8px; border: 1px solid #2f4467; background: #1b2a44;
+        color: #e2e8f0; font-size: 14px; cursor: pointer;
+      }
+      button.primary { background: #0e6b58; border-color: #0e6b58; color: #fff; font-weight: 600; }
+      button:hover { filter: brightness(1.12); }
+      .hint { margin-top: 20px; font-size: 12px; color: #64748b; line-height: 1.8; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="brand">
+        <div class="logo">PM</div>
+        <div class="brand-text">镒源流体 · 项目管理系统桌面端</div>
+      </div>
+      <h1 id="title">页面加载失败</h1>
+      <pre id="detail">正在读取诊断信息…</pre>
+      <div class="actions">
+        <button class="primary" id="retry">重新加载</button>
+        <button id="copy">复制诊断信息</button>
+      </div>
+      <div class="hint">
+        该页面为客户端本地兜底页（离线可用）。若多次重试仍失败，请将上方诊断信息反馈给系统管理员。
+      </div>
+    </div>
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var title = params.get('title') || '页面加载失败';
+        var detail = params.get('detail') || '未获取到详细信息';
+        var appUrl = params.get('app') || '';
+        var canRetry = params.get('canRetry') !== '0';
+        document.getElementById('title').textContent = title;
+        document.getElementById('detail').textContent = detail;
+        var retry = document.getElementById('retry');
+        if (!canRetry) retry.disabled = true;
+        retry.addEventListener('click', function () {
+          retry.disabled = true;
+          retry.textContent = '正在重试…';
+          window.location.href = appUrl || 'about:blank';
+        });
+        document.getElementById('copy').addEventListener('click', function () {
+          var text = title + '\n' + detail + '\n' + new Date().toLocaleString();
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).catch(function () {});
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

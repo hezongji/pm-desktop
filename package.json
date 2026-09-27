@@ -5,7 +5,7 @@
   "description": "PM 项目管理系统桌面端（开源版·本地全栈：Electron 壳 + 内嵌 Next 服务 + IM + 嵌入式 PostgreSQL，数据全在本机）",
   "main": "dist/main/index.cjs",
   "author": "hezongji",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "build": "node scripts/build.mjs",
